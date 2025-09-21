@@ -36,19 +36,12 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <!-- 커스텀 CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div id="app" class="container mx-auto px-4 py-8 pb-16">
         <div class="max-w-4xl mx-auto">
             <!-- 헤더 섹션 -->
-            <!-- <div class="text-center mb-12" data-aos="fade-down">
-                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                    중국어 단어장
-                </h1>
-                <p class="text-gray-600 text-lg">체계적으로 중국어 단어를 학습하고 관리하세요</p>
-            </div> -->
-            
             <!-- 단어 추가 카드 -->
             <div class="glass-effect rounded-2xl shadow-xl p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
                 <div class="flex flex-col md:flex-row gap-4">
@@ -132,11 +125,11 @@
                     내보내기
                 </button>
                 
-                <label class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
+                <!-- <label class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
                     <i data-feather="upload" class="w-5 h-5 mr-2"></i> 
                     가져오기
                     <input type="file" accept=".json" class="hidden" onchange="if(this.files.length) wordbook.importData(this.files[0])">
-                </label>
+                </label> -->
                 
                 <button 
                     id="clearAllBtn" 
@@ -204,8 +197,8 @@
     </div>
 
     <!-- 커스텀 JavaScript -->
-    <script src="ui-utils.js"></script>
-    <script src="translation-service.js"></script>
-    <script src="script.js"></script>
+    <script src="static/js/ui-utils.js"></script>
+    <script src="static/js/translation-service.js"></script>
+    <script src="static/js/script.js"></script>
 </body>
 </html>
