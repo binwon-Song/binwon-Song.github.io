@@ -28,6 +28,7 @@ class ChineseWordbook {
             saveEditBtn: document.getElementById('saveEditBtn'),
             editChinese: document.getElementById('editChinese'),
             editPinyin: document.getElementById('editPinyin'),
+            editYinyus: document.getElementById('editYinyus'),
             editKorean: document.getElementById('editKorean')
         };
     }
@@ -102,16 +103,18 @@ class ChineseWordbook {
             // 실제 번역 API 호출
             this.showNotification('번역을 가져오는 중입니다...', 'info');
             const translationResult = await this.translateWord(chineseWord);
-
+            console.log('번역 결과:', translationResult.pinyins);   
             const newWord = {
                 chinese: chineseWord,
-                pinyin: translationResult.pinyin || '[병음 없음]',
-                korean: translationResult.meanings && translationResult.meanings.length > 0 
-                    ? translationResult.meanings.join(', ') 
+                pinyin: translationResult.pinyins && translationResult.pinyins.length > 0
+                    ? translationResult.pinyins.join(', ')
+                    : '[병음 없음]',
+                korean: translationResult.meanings && translationResult.meanings.length > 0
+                    ? translationResult.meanings.join(', ')
                     : '[번역 없음]',
                 id: Date.now(),
                 createdAt: new Date().toISOString(),
-                meanings: translationResult.meanings || []
+                // meanings: translationResult.meanings || []
             };
 
             this.words.push(newWord);
@@ -180,16 +183,16 @@ class ChineseWordbook {
         const row = document.createElement('tr');
         row.className = 'animate-fade-in hover:bg-gray-50 transition-colors duration-200';
         row.innerHTML = `
-            <td class="px-6 py-4 w-1/4">
+            <td class="px-4 py-4 w-1/5">
                 <div class="text-lg font-semibold text-gray-900 chinese-text">${this.escapeHtml(word.chinese)}</div>
             </td>
-            <td class="px-6 py-4 w-1/4">
-                <div class="text-sm text-gray-600 font-mono">${this.escapeHtml(word.pinyin)}</div>
+            <td class="px-4 py-4 w-1/5">
+                <div class="text-sm text-gray-600 font-mono">${this.escapeHtml(word.pinyin || '[병음 없음]')}</div>
             </td>
-            <td class="px-6 py-4 w-1/3">
+            <td class="px-4 py-4 w-1/4">
                 <div class="text-sm text-gray-800">${this.escapeHtml(word.korean)}</div>
             </td>
-            <td class="px-6 py-4 text-center w-1/6">
+            <td class="px-4 py-4 text-center w-1/6">
                 <div class="flex justify-center space-x-1">
                     <button class="retranslate-btn p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-colors duration-200" data-index="${index}" title="재번역">
                         <i data-feather="refresh-cw" class="w-4 h-4"></i>
@@ -227,11 +230,13 @@ class ChineseWordbook {
             // 기존 단어 정보 업데이트
             this.words[index] = {
                 ...word,
-                pinyin: translationResult.pinyin || '[병음 없음]',
+                pinyin: translationResult.pinyins && translationResult.pinyins.length > 0
+                    ? translationResult.pinyins.join(', ')
+                    : '[병음 없음]',
                 korean: translationResult.meanings && translationResult.meanings.length > 0 
                     ? translationResult.meanings.join(', ') 
                     : '[번역 없음]',
-                meanings: translationResult.meanings || [],
+                id: Date.now(),
                 updatedAt: new Date().toISOString()
             };
 
@@ -271,7 +276,8 @@ class ChineseWordbook {
         const word = this.words[index];
 
         this.elements.editChinese.value = word.chinese;
-        this.elements.editPinyin.value = word.pinyin;
+        this.elements.editPinyin.value = word.pinyin || '';
+        this.elements.editYinyus.value = word.yinyus || '';
         this.elements.editKorean.value = word.korean;
 
         this.elements.editModal.classList.remove('hidden');
@@ -308,8 +314,8 @@ class ChineseWordbook {
         const pinyin = this.elements.editPinyin.value.trim();
         const korean = this.elements.editKorean.value.trim();
 
-        if (!chinese || !pinyin || !korean) {
-            this.showNotification('모든 필드를 입력해주세요.', 'warning');
+        if (!chinese || !korean) {
+            this.showNotification('중국어와 한국어 뜻은 필수 입력 항목입니다.', 'warning');
             return;
         }
 
@@ -326,7 +332,7 @@ class ChineseWordbook {
         this.words[this.currentEditIndex] = {
             ...this.words[this.currentEditIndex],
             chinese: chinese,
-            pinyin: pinyin,
+            pinyin: pinyin || '[병음 없음]',
             korean: korean,
             updatedAt: new Date().toISOString()
         };
@@ -365,27 +371,6 @@ class ChineseWordbook {
         this.showNotification('데이터가 내보내졌습니다.', 'success');
     }
 
-    // 데이터 가져오기
-    importData(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const importedWords = JSON.parse(e.target.result);
-                if (Array.isArray(importedWords)) {
-                    this.words = importedWords;
-                    this.saveWords();
-                    this.updateWordTable();
-                    this.showNotification('데이터가 성공적으로 가져와졌습니다.', 'success');
-                } else {
-                    throw new Error('Invalid format');
-                }
-            } catch (error) {
-                this.showNotification('올바르지 않은 파일 형식입니다.', 'error');
-            }
-        };
-        reader.readAsText(file);
-    }
-
     // 전체 재번역
     async retranslateAll() {
         if (this.words.length === 0) {
@@ -418,7 +403,9 @@ class ChineseWordbook {
                 if (result.success) {
                     this.words[index] = {
                         ...this.words[index],
-                        pinyin: result.pinyin || '[병음 없음]',
+                        pinyin: result.pinyins && result.pinyins.length > 0
+                            ? result.pinyins.join(', ')
+                            : '[병음 없음]',
                         korean: result.meanings && result.meanings.length > 0 
                             ? result.meanings.join(', ') 
                             : '[번역 없음]',
