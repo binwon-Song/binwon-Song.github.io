@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>중국어 단어장</title>
     
+    <!-- GitHub Pages 호환성 메타 태그 -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="중국어 단어장 웹 애플리케이션">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -197,8 +201,49 @@
     </div>
 
     <!-- 커스텀 JavaScript -->
-    <script src="static/js/ui-utils.js"></script>
-    <script src="static/js/translation-service.js"></script>
-    <script src="static/js/script.js"></script>
+    <script>
+        // 파일 로딩 에러 처리
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'SCRIPT') {
+                console.error('스크립트 로딩 실패:', e.target.src);
+                document.body.innerHTML += '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:10px;z-index:9999;">스크립트 로딩 실패: ' + e.target.src + '</div>';
+            }
+        }, true);
+        
+        // 기본 로딩 표시
+        console.log('페이지 로딩 시작...');
+    </script>
+    
+    <script src="static/js/ui-utils.js" onerror="console.error('ui-utils.js 로딩 실패')"></script>
+    <script src="static/js/translation-service.js" onerror="console.error('translation-service.js 로딩 실패')"></script>
+    <script src="static/js/script.js" onerror="console.error('script.js 로딩 실패')"></script>
+    
+    <script>
+        // 스크립트 로딩 완료 후 초기화
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 로딩 완료');
+            
+            // Feather 아이콘 초기화
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+            
+            // AOS 애니메이션 초기화
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 100
+                });
+            }
+            
+            // 앱 초기화 확인
+            setTimeout(() => {
+                if (typeof window.wordbook === 'undefined') {
+                    document.body.innerHTML += '<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:orange;color:white;padding:20px;z-index:9999;border-radius:10px;">앱 초기화 실패 - 스크립트 파일을 확인해주세요</div>';
+                }
+            }, 2000);
+        });
+    </script>
 </body>
 </html>
