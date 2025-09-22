@@ -1,4 +1,5 @@
 __pycache__
 *.txt
 test*
-static/js/env.js
+node_modules
+.DS_Store
