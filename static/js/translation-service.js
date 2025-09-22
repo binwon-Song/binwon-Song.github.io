@@ -10,15 +10,14 @@ class ChineseTranslationService {
     // 메인 번역 함수
     async translateWord(word) {
         try {
-            // 먼저 검색 페이지에서 wordid와 supid를 가져옵니다
-            const searchResult = await this.getWordIdFromSearch(word);
-            if (!searchResult) {
+            // {word: '得', main_pro: '[‧de]', main_meanings: Array(5), other_pros: Array(1), other_means: Array(1)}
+            const results = await this.getWordFromDaum(word); 
+            if (!results) {
                 throw new Error('검색 결과를 찾을 수 없습니다');
             }
-            console.log('검색 결과:', searchResult);
-            // 상세 페이지에서 병음과 의미를 가져옵니다
-            const detailResult = await this.getWordDetails(searchResult.wordid, searchResult.supid, word);
-            return detailResult;
+            console.log('검색 결과:', results);
+
+            return results;
         } catch (error) {
             console.error('번역 오류:', error);
             throw error;
@@ -26,7 +25,7 @@ class ChineseTranslationService {
     }
 
     // CORS 프록시를 통해 검색 페이지에서 wordid와 supid 추출
-    async getWordIdFromSearch(word) {
+    async getWordFromDaum(word) {
         try {
             const searchUrl = `${this.baseUrl}/search.do?q=${encodeURIComponent(word)}&dic=ch`;
             
@@ -36,137 +35,153 @@ class ChineseTranslationService {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             
-            const metaTag = doc.querySelector('meta[name="tiara:custom-properties-0"]');
-            console.log("Parser", metaTag);
-            if (metaTag && metaTag.content) {
-                const content = metaTag.content;
-                const regex = /"exact_id":\s*"([^"]+)"/;
-                const match = content.match(regex);
-                if (match && match[1]) {
-                    const exactId = match[1];
-                    if (exactId.includes('_')) {
-                        const [wordid, supid] = exactId.split('_');
-                        return { wordid, supid };
-                    }
-                }
+            const box = ".search_box"
+            const main_word_box = ".cleanword_type"
+            const other_word_box = ".search_type"
+
+            const searchBoxElem = doc.querySelector(box);
+            if (!searchBoxElem) {
+                console.log('검색 박스를 찾을 수 없습니다');
+                return null;
             }
+
+            const mainWordElem = searchBoxElem.querySelector(main_word_box);
+            const otherWordElems = searchBoxElem.querySelectorAll(other_word_box);
+
+            const main_pro = this.getWord(mainWordElem, '.txt_pronounce');
+            const main_meanings = this.getWord(mainWordElem, '.txt_search', true);
             
-            // 대안 방법: 첫 번째 결과 링크에서 추출
-            const firstLink = doc.querySelector('a[href*="wordid="]');
-            if (firstLink) {
-                const href = firstLink.href;
-                const wordidMatch = href.match(/wordid=([^&]+)/);
-                const supidMatch = href.match(/supid=([^&]+)/);
-                
-                if (wordidMatch && supidMatch) {
-                    console.log('첫 번째 링크에서 추출:', href);
-                    return {
-                        wordid: wordidMatch[1],
-                        supid: supidMatch[1]
-                    };
+            const other_pros = []
+            const other_means = []
+
+            let tmp_pro = [] // 배열로 초기화
+            let tmp_means = [] // 변수 선언 분리
+            
+            otherWordElems.forEach((elem, index) => {
+                try {
+                    const pro = this.getWord(elem, '.txt_pronounce');
+                    const means = this.getWord(elem, '.txt_search', true);
+                    tmp_pro.push(pro);
+                    tmp_means.push(means);
+                } catch (error) {
+                    console.error(`요소 ${index} 처리 중 오류:`, error);
                 }
-            }
+            });
+            other_pros.push(tmp_pro);
+            other_means.push(tmp_means);
             
-            return null;
+            // reformat for output
+            return {
+                word:word,
+                main_pro: main_pro,
+                main_meanings: main_meanings,
+                other_pros: other_pros,
+                other_means: other_means
+            }
         } catch (error) {
             console.error('검색 페이지 파싱 오류:', error);
             return null;
         }
     }
 
-    // 상세 페이지에서 병음과 의미 추출
-    /**
-     * @returns {중국어, 병음, 한국어 뜻}
-     */
-    async getWordDetails(wordid, supid, word) {
-        try {
-            const detailUrl = `${this.baseUrl}/word/view.do?wordid=${wordid}&q=${encodeURIComponent(word)}&supid=${supid}`;
-            
-            const response = await fetch(this.proxyUrl + encodeURIComponent(detailUrl));
-            const html = await response.text();
-            
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            console.log('상세 페이지 HTML 파싱 완료', doc);
 
-            // 병음 추출
-            const pinyinElem = doc.querySelector('.txt_pronounce');
-            const pinyins = pinyinElem ? [pinyinElem.textContent.trim().match(/\[([^\]]+)\]/)[1]] : [];
-            const yinyuElem = doc.querySelectorAll('.txt_pro');
-            const yinyus = [];
-            yinyuElem.forEach(elem => {
-                let yinyu = elem.textContent.trim();
-                const bracketMatch = yinyu.match(/\[([^\]]+)\]/);
-                if (bracketMatch) {
-                    yinyu = bracketMatch[1];
-                }
-                yinyus.push(yinyu);
+    getWord(element, attr, findAll=false) {
+        if (!element) return findAll ? [] : '';
+        
+        if (findAll) {
+            const results = [];
+            const elements = element.querySelectorAll(attr);
+            elements.forEach(e => {
+                results.push(e.innerText);
             });
-            if (yinyus.length > 0) {
-                pinyins.push(...yinyus);
-            }
-            console.log('추출된 병음:', pinyins);
-            // 한국어 의미 추출
-            const meaningElems = doc.querySelectorAll('.txt_mean');
-            const meanings = [];
-            meaningElems.forEach(elem => {
-                const meaning = elem.textContent.trim();
-                meanings.push(meaning);
-            });
-            
-            
-            return {
-                word: word,
-                pinyins: pinyins,
-                meanings: meanings,
-                success: true
-            };
-        } catch (error) {
-            console.error('상세 페이지 파싱 오류:', error);
-            throw error;
+            return results;
         }
+        
+        const targetElement = element.querySelector(attr);
+        return targetElement ? targetElement.innerText : '';
     }
+
+
+    // // 상세 페이지에서 병음과 의미 추출
+    // /**
+    //  * @returns {중국어, 병음, 한국어 뜻}
+    //  */
+    // async getWordDetails(link, word) {
+    //     try {
+    //         const detailUrl = `${this.baseUrl}${link}`;
+    //         const response = await fetch(this.proxyUrl + encodeURIComponent(detailUrl));
+    //         // const response = await fetch(detailUrl);
+    //         const html = await response.text();
+            
+    //         const parser = new DOMParser();
+    //         const doc = parser.parseFromString(html, 'text/html');
+
+    //         // 병음 추출
+    //         const pinyinElem = doc.querySelector('.txt_pronounce');
+    //         const pinyins = pinyinElem ? [pinyinElem.textContent.trim().match(/\[([^\]]+)\]/)[1]] : [];
+    //         console.log('추출된 병음:', pinyins);
+    //         // 한국어 의미 추출
+    //         const meaningElems = doc.querySelector('.list_mean').querySelectorAll('.txt_mean');
+    //         console.log('의미 요소:', meaningElems);
+    //         const meanings = [];
+    //         meaningElems.forEach(elem => {
+    //             const meaning = elem.textContent.trim();
+    //             meanings.push(meaning);
+    //         });
+            
+            
+    //         return {
+    //             word: word,
+    //             pinyins: pinyins,
+    //             meanings: meanings,
+    //             success: true
+    //         };
+    //     } catch (error) {
+    //         console.error('상세 페이지 파싱 오류:', error);
+    //         throw error;
+    //     }
+    // }
 
     // 여러 단어 일괄 번역 (지연 시간 포함)
-    async translateMultipleWords(words, onProgress = null, delay = 200) {
-        const results = [];
+    // async translateMultipleWords(words, onProgress = null, delay = 200) {
+    //     const results = [];
         
-        for (let i = 0; i < words.length; i++) {
-            const word = words[i];
+    //     for (let i = 0; i < words.length; i++) {
+    //         const word = words[i];
             
-            try {
-                // 진행 상황 콜백 호출
-                if (onProgress) {
-                    onProgress(i + 1, words.length, word);
-                }
+    //         try {
+    //             // 진행 상황 콜백 호출
+    //             if (onProgress) {
+    //                 onProgress(i + 1, words.length, word);
+    //             }
                 
-                // 각 요청 사이에 지연 시간 추가 (서버 부하 방지)
-                if (i > 0) {
-                    await this.sleep(delay);
-                }
+    //             // 각 요청 사이에 지연 시간 추가 (서버 부하 방지)
+    //             if (i > 0) {
+    //                 await this.sleep(delay);
+    //             }
                 
-                const result = await this.translateWord(word);
-                results.push({
-                    success: true,
-                    ...result
-                });
-            } catch (error) {
-                console.error(`${word} 번역 실패:`, error);
-                results.push({
-                    success: false,
-                    word: word,
-                    error: error.message
-                });
-            }
-        }
+    //             const result = await this.translateWord(word);
+    //             results.push({
+    //                 success: true,
+    //                 ...result
+    //             });
+    //         } catch (error) {
+    //             console.error(`${word} 번역 실패:`, error);
+    //             results.push({
+    //                 success: false,
+    //                 word: word,
+    //                 error: error.message
+    //             });
+    //         }
+    //     }
         
-        return results;
-    }
+    //     return results;
+    // }
 
-    // 지연 함수
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    // // 지연 함수
+    // sleep(ms) {
+    //     return new Promise(resolve => setTimeout(resolve, ms));
+    // }
 
 }
 

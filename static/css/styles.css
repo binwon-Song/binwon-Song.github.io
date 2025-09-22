@@ -191,3 +191,8 @@ body {
     min-height: 100vh;
     padding-bottom: 4rem;
 }
+
+/* 간소화된 테이블 스타일 */
+.multi-pinyin-table tbody tr:hover td {
+    background-color: #f8fafc !important;
+}
