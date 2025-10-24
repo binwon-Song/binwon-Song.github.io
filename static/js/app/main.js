@@ -190,176 +190,40 @@ class ChineseWordbook {
     }
 
     createWordRow(word, index) {
-        // 모든 병음과 의미를 수집
-        const allPinyins = [];
-        const allMeanings = [];
-        
-        console.log('Word data:', word); // 디버깅용
-        
-        // 메인 병음과 의미 추가
-        if (word.pinyin && word.pinyin !== '[병음 없음]') {
-            allPinyins.push(word.pinyin);
-            // 메인 의미를 리스트로 처리
-            let mainMeanings = word.meanings || '[의미 없음]';
-            if (typeof mainMeanings === 'string' && mainMeanings.includes(',')) {
-                mainMeanings = mainMeanings.split(',').map(m => m.trim());
-            }
-            allMeanings.push(mainMeanings);
-        }
-        
-        // 추가 병음들과 의미들 처리 - other_pros의 각 요소를 개별적으로 처리
-        if (word.other_pros && Array.isArray(word.other_pros)) {
-            console.log('Other pros:', word.other_pros);
-            console.log('Other means:', word.other_means);
-            
-            // other_pros가 배열의 배열인지 확인
-            if (word.other_pros.length > 0 && Array.isArray(word.other_pros[0])) {
-                // other_pros가 [[pros1], [pros2]] 형태인 경우
-                word.other_pros.forEach((prosArray, arrayIndex) => {
-                    if (Array.isArray(prosArray)) {
-                        prosArray.forEach((pros, prosIndex) => {
-                            if (pros) {
-                                allPinyins.push(pros);
-                                // 해당하는 의미 가져오기
-                                let meanings = '[의미 없음]';
-                                if (word.other_means && 
-                                    word.other_means[arrayIndex] && 
-                                    word.other_means[arrayIndex][prosIndex]) {
-                                    meanings = word.other_means[arrayIndex][prosIndex];
-                                    if (Array.isArray(meanings)) {
-                                        // 이미 배열이면 그대로 사용
-                                    } else if (typeof meanings === 'string' && meanings.includes(',')) {
-                                        meanings = meanings.split(',').map(m => m.trim());
-                                    }
-                                }
-                                allMeanings.push(meanings);
-                            }
-                        });
-                    }
-                });
-            } else {
-                // other_pros가 [pros1, pros2] 형태인 경우
-                word.other_pros.forEach((pros, i) => {
-                    if (pros) {
-                        allPinyins.push(pros);
-                        let meanings = '[의미 없음]';
-                        if (word.other_means && word.other_means[i]) {
-                            meanings = word.other_means[i];
-                            if (Array.isArray(meanings)) {
-                                // 이미 배열이면 그대로 사용
-                            } else if (typeof meanings === 'string' && meanings.includes(',')) {
-                                meanings = meanings.split(',').map(m => m.trim());
-                            }
-                        }
-                        allMeanings.push(meanings);
-                    }
-                });
-            }
-        }
-        
-        const pinyinCount = allPinyins.length;
-        console.log('Total pinyins:', pinyinCount, allPinyins);
-        console.log('All meanings:', allMeanings);
-        
-        // 병음 개수에 따른 테이블 구조 생성
-        if (pinyinCount <= 1) {
-            // 기본 구조 (1개 또는 0개)
-            const row = document.createElement('tr');
-            row.className = 'animate-fade-in hover:bg-gray-50 transition-colors duration-200';
-            
-            row.innerHTML = `
-                <td class="px-4 py-4 w-1/5">
-                    <div class="text-lg font-semibold text-gray-900">${this.escapeHtml(word.chinese)}</div>
-                </td>
-                <td class="px-4 py-4 w-1/5">
-                    <div class="text-sm font-mono text-blue-800 font-semibold">
-                        ${pinyinCount > 0 ? this.escapeHtml(allPinyins[0]) : '[병음 없음]'}
-                    </div>
-                </td>
-                <td class="px-4 py-4 w-2/5">
-                    <div class="text-blue-900">
-                        ${pinyinCount > 0 ? this.formatMeaningsAsHtml(allMeanings[0]) : '[의미 없음]'}
-                    </div>
-                </td>
-                <td class="px-4 py-4 text-center w-1/6">
-                    <div class="flex justify-center space-x-1">
-                        <button class="retranslate-btn p-1.5 text-green-500 hover:bg-green-50 rounded" data-index="${index}" title="재번역">
-                            <i data-feather="refresh-cw" class="w-4 h-4"></i>
-                        </button>
-                        <button class="edit-btn p-1.5 text-blue-500 hover:bg-blue-50 rounded" data-index="${index}" title="수정">
-                            <i data-feather="edit-2" class="w-4 h-4"></i>
-                        </button>
-                        <button class="delete-btn p-1.5 text-red-500 hover:bg-red-50 rounded" data-index="${index}" title="삭제">
-                            <i data-feather="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            
-            this.addEventListeners(row, index);
-            return row;
-        } else {
-            // 다중 병음 구조 (2개 이상)
-            const fragment = document.createDocumentFragment();
-            
-            allPinyins.forEach((pinyin, pinyinIndex) => {
-                const row = document.createElement('tr');
-                row.className = 'animate-fade-in hover:bg-gray-50 transition-colors duration-200';
-                
-                // 첫 번째 행에만 중국어와 작업 버튼 표시
-                if (pinyinIndex === 0) {
-                    row.innerHTML = `
-                        <td class="px-4 py-4 w-1/5 border-r" rowspan="${pinyinCount}">
-                            <div class="text-lg font-semibold text-gray-900">${this.escapeHtml(word.chinese)}</div>
-                            <div class="text-xs text-gray-500 mt-1">${pinyinCount}개 발음</div>
-                        </td>
-                        <td class="px-4 py-3 w-1/4 ${pinyinIndex === 0 ? 'bg-blue-50' : 'bg-gray-50'}">
-                            <div class="text-sm font-mono ${pinyinIndex === 0 ? 'text-blue-800 font-semibold' : 'text-gray-700'}">
-                                ${this.escapeHtml(pinyin)}
-                                ${pinyinIndex === 0 ? '<span class="text-xs ml-2 bg-blue-200 text-blue-800 px-1 rounded">메인</span>' : ''}
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 w-2/5 ${pinyinIndex === 0 ? 'bg-blue-25' : 'bg-gray-25'}">
-                            <div class="${pinyinIndex === 0 ? 'text-blue-900' : 'text-gray-800'}">
-                                ${this.formatMeaningsAsHtml(allMeanings[pinyinIndex] || '[의미 없음]')}
-                            </div>
-                        </td>
-                        <td class="px-4 py-4 text-center w-1/6 border-l" rowspan="${pinyinCount}">
-                            <div class="flex justify-center space-x-1">
-                                <button class="retranslate-btn p-1.5 text-green-500 hover:bg-green-50 rounded" data-index="${index}" title="재번역">
-                                    <i data-feather="refresh-cw" class="w-4 h-4"></i>
-                                </button>
-                                <button class="edit-btn p-1.5 text-blue-500 hover:bg-blue-50 rounded" data-index="${index}" title="수정">
-                                    <i data-feather="edit-2" class="w-4 h-4"></i>
-                                </button>
-                                <button class="delete-btn p-1.5 text-red-500 hover:bg-red-50 rounded" data-index="${index}" title="삭제">
-                                    <i data-feather="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    this.addEventListeners(row, index);
-                } else {
-                    // 나머지 행들은 병음과 의미만 표시
-                    row.innerHTML = `
-                        <td class="px-4 py-3 w-1/4 bg-gray-50">
-                            <div class="text-sm font-mono text-gray-700">
-                                ${this.escapeHtml(pinyin)}
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 w-2/5 bg-gray-25">
-                            <div class="text-gray-800">
-                                ${this.formatMeaningsAsHtml(allMeanings[pinyinIndex] || '[의미 없음]')}
-                            </div>
-                        </td>
-                    `;
-                }
-                
-                fragment.appendChild(row);
+        // UI 렌더링을 uiUtils로 위임합니다. uiUtils가 준비되지 않았으면 단순한 대체 row를 반환합니다.
+        if (window.uiUtils && typeof window.uiUtils.renderWordRow === 'function') {
+            return window.uiUtils.renderWordRow(word, index, {
+                retranslate: (i) => this.retranslateWord(i),
+                edit: (i) => this.openEditModal(i),
+                delete: (i) => this.deleteWord(i)
             });
-            
-            return fragment;
         }
+
+        // 폴백: 최소한의 row
+        const row = document.createElement('tr');
+        row.className = 'animate-fade-in hover:bg-gray-50 transition-colors duration-200';
+        const pinyin = word.pinyin || '[병음 없음]';
+        const meaning = word.meanings || word.korean || '[의미 없음]';
+        row.innerHTML = `
+            <td class="px-4 py-4 w-1/5"><div class="text-lg font-semibold text-gray-900">${this.escapeHtml(word.chinese)}</div></td>
+            <td class="px-4 py-4 w-1/5"><div class="text-sm font-mono text-blue-800 font-semibold">${this.escapeHtml(pinyin)}</div></td>
+            <td class="px-4 py-4 w-2/5"><div class="text-blue-900">${this.escapeHtml(meaning)}</div></td>
+            <td class="px-4 py-4 text-center w-1/6">
+                <div class="flex justify-center space-x-1">
+                    <button class="retranslate-btn p-1.5 text-green-500 hover:bg-green-50 rounded" data-index="${index}" title="재번역">재번역</button>
+                    <button class="edit-btn p-1.5 text-blue-500 hover:bg-blue-50 rounded" data-index="${index}" title="수정">수정</button>
+                    <button class="delete-btn p-1.5 text-red-500 hover:bg-red-50 rounded" data-index="${index}" title="삭제">삭제</button>
+                </div>
+            </td>
+        `;
+        // 이벤트 바인딩
+        const retranslateBtn = row.querySelector('.retranslate-btn');
+        const editBtn = row.querySelector('.edit-btn');
+        const deleteBtn = row.querySelector('.delete-btn');
+        if (retranslateBtn) retranslateBtn.addEventListener('click', () => this.retranslateWord(index));
+        if (editBtn) editBtn.addEventListener('click', () => this.openEditModal(index));
+        if (deleteBtn) deleteBtn.addEventListener('click', () => this.deleteWord(index));
+        return row;
     }
     
     // 의미를 HTML 리스트로 변환하는 헬퍼 함수
@@ -537,7 +401,7 @@ class ChineseWordbook {
         localStorage.setItem('chineseWords', JSON.stringify(this.words));
     }
 
-        // 번역 서비스 사용
+    // 번역 서비스 사용
     async translateWord(word) {
         return await window.translationService.translateWord(word);
     }
@@ -554,78 +418,74 @@ class ChineseWordbook {
 
     // 데이터 내보내기 (UI 유틸리티 사용)
     exportData() {
-        const dataStr = JSON.stringify(this.words, null, 2);
-        const filename = `chinese-wordbook-${new Date().toISOString().split('T')[0]}.json`;
-        
-        window.uiUtils.downloadFile(dataStr, filename);
-        this.showNotification('데이터가 내보내졌습니다.', 'success');
-    }
+        // 붙여넣기하기 쉬운 텍스트로 변환: "중국어<TAB>병음<TAB>한국어 뜻"
+        const lines = [];
+        this.words.forEach(word => {
+            try {
+                const allPinyins = [];
+                const allMeanings = [];
 
-    // 전체 재번역
-    async retranslateAll() {
-        if (this.words.length === 0) {
-            this.showNotification('재번역할 단어가 없습니다.', 'info');
-            return;
-        }
-
-        const confirmed = confirm(`총 ${this.words.length}개의 단어를 재번역하시겠습니까?\n시간이 오래 걸릴 수 있습니다.`);
-        if (!confirmed) return;
-
-        let successCount = 0;
-        let errorCount = 0;
-        
-        // 진행 상황 표시용 요소 생성 (UI 유틸리티 사용)
-        const progressDiv = window.uiUtils.createProgressIndicator('재번역 중...');
-        
-        try {
-            // 번역 서비스의 일괄 번역 기능 사용
-            const wordsToTranslate = this.words.map(word => word.chinese);
-            
-            const results = await window.translationService.translateMultipleWords(
-                wordsToTranslate,
-                (current, total, currentWord) => {
-                    window.uiUtils.updateProgress(progressDiv, current, total, currentWord);
+                if (word.pinyin && word.pinyin !== '[병음 없음]') {
+                    allPinyins.push(word.pinyin);
+                    allMeanings.push(word.meanings || word.korean || '');
                 }
-            );
-            
-            // 결과 적용
-            results.forEach((result, index) => {
-                if (result.success) {
-                    this.words[index] = {
-                        ...this.words[index],
-                        pinyin: result.main_pro || '[병음 없음]',
-                        meanings: result.main_meanings && result.main_meanings.length > 0
-                            ? result.main_meanings.join(', ')
-                            : '[번역 없음]',
-                        korean: result.main_meanings && result.main_meanings.length > 0 
-                            ? result.main_meanings.join(', ') 
-                            : '[번역 없음]',
-                        other_pros: result.other_pros || [],
-                        other_means: result.other_means || [],
-                        updatedAt: new Date().toISOString()
-                    };
-                    successCount++;
+
+                if (word.other_pros && Array.isArray(word.other_pros)) {
+                    if (word.other_pros.length > 0 && Array.isArray(word.other_pros[0])) {
+                        // other_pros가 배열의 배열인 경우
+                        word.other_pros.forEach((prosArray, ai) => {
+                            if (!Array.isArray(prosArray)) return;
+                            prosArray.forEach((p, pi) => {
+                                if (!p) return;
+                                allPinyins.push(p);
+                                let m = '';
+                                if (word.other_means && word.other_means[ai] && word.other_means[ai][pi]) {
+                                    m = Array.isArray(word.other_means[ai][pi]) ? word.other_means[ai][pi].join(', ') : word.other_means[ai][pi];
+                                }
+                                allMeanings.push(m || '');
+                            });
+                        });
+                    } else {
+                        // other_pros가 단일 배열인 경우
+                        word.other_pros.forEach((p, i) => {
+                            if (!p) return;
+                            allPinyins.push(p);
+                            let m = '';
+                            if (word.other_means && word.other_means[i]) {
+                                m = Array.isArray(word.other_means[i]) ? word.other_means[i].join(', ') : word.other_means[i];
+                            }
+                            allMeanings.push(m || '');
+                        });
+                    }
+                }
+
+                // 라인 생성: pinyin이 여러개면 각각 new line
+                if (allPinyins.length === 0) {
+                    const meaning = word.korean || word.meanings || '';
+                    lines.push(`${word.chinese}\t\t${meaning}`);
                 } else {
-                    errorCount++;
+                    allPinyins.forEach((p, idx) => {
+                        const meaning = (allMeanings[idx] && allMeanings[idx].length > 0) ? allMeanings[idx] : (word.korean || word.meanings || '');
+                        lines.push(`${word.chinese}\t${p}\t${meaning}`);
+                    });
                 }
-            });
-            
-            // 결과 저장 및 업데이트
-            this.saveWords();
-            this.updateWordTable();
-            
-            // 결과 알림
-            const message = `재번역 완료!\n성공: ${successCount}개, 실패: ${errorCount}개`;
-            this.showNotification(message, errorCount > 0 ? 'warning' : 'success');
-            
-        } finally {
-            // 진행 상황 표시 제거 (UI 유틸리티 사용)
-            window.uiUtils.removeProgressIndicator(progressDiv);
-        }
+            } catch (e) {
+                console.error('exportData item formatting error', e, word);
+            }
+        });
+
+        const exportText = lines.join('\n');
+        // 클립보드에 복사 (비동기)
+        navigator.clipboard.writeText(exportText).then(() => {
+            this.showNotification('클립보드에 복사되었습니다. 문서에 붙여넣기 하세요.', 'success');
+        }).catch(err => {
+            console.error('클립보드 복사 실패:', err);
+            // 실패시 JSON으로 대체 다운로드 제공
+            this.showNotification('클립보드 복사에 실패했습니다. JSON 파일로 다운로드합니다.', 'warning');
+            const dataStr = JSON.stringify(this.words, null, 2);
+            window.uiUtils.downloadFile(dataStr, `chinese-wordbook-${new Date().toISOString().split('T')[0]}.json`);
+        });
     }
-
-
-
 
 }
 

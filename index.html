@@ -44,7 +44,7 @@
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div id="app" class="container mx-auto px-4 py-8 pb-16">
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-6xl mx-auto">
             <!-- 헤더 섹션 -->
             <!-- 단어 추가 카드 -->
             <div class="glass-effect rounded-2xl shadow-xl p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
@@ -129,7 +129,7 @@
                 <button 
                     id="exportBtn" 
                     class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    onclick="UIUtils.copyToClipboard()"
+                    onclick="wordbook && wordbook.exportData()"
                 >
                     <i data-feather="download" class="w-5 h-5 mr-2"></i> 
                     복사하기
@@ -220,9 +220,9 @@
         console.log('페이지 로딩 시작...');
     </script>
     
-    <script src="static/js/ui-utils.js" onerror="console.error('ui-utils.js 로딩 실패')"></script>
-    <script src="static/js/translation-service.js" onerror="console.error('translation-service.js 로딩 실패')"></script>
-    <script src="static/js/script.js" onerror="console.error('script.js 로딩 실패')"></script>
+    <script src="static/js/ui/ui-utils.js" onerror="console.error('ui-utils.js 로딩 실패')"></script>
+    <script src="static/js/services/translation-service.js" onerror="console.error('translation-service.js 로딩 실패')"></script>
+    <script src="static/js/app/main.js" onerror="console.error('main.js 로딩 실패')"></script>
     
     <script>
         // 스크립트 로딩 완료 후 초기화

@@ -5,6 +5,20 @@ class ChineseTranslationService {
     constructor() {
         this.proxyUrl = 'https://api.allorigins.win/raw?url=';
         this.baseUrl = 'https://dic.daum.net';
+        // 성능/신뢰성 개선용 설정
+        this.cache = new Map(); // 간단한 메모리 캐시
+        this.cacheTTL = 1000 * 60 * 60; // 1시간 캐시
+    }
+
+    // 단순 fetch 래퍼: 타임아웃을 제거하여 모든 요청이 브라우저의 기본 동작을 따르도록 함
+    async fetchWithTimeout(url, options = {}) {
+        try {
+            const res = await fetch(url, options);
+            return res;
+        } catch (err) {
+            console.error('fetch error for', url, err);
+            throw err;
+        }
     }
 
     // 메인 번역 함수
@@ -31,9 +45,16 @@ class ChineseTranslationService {
             
             // check time taken
             console.log("URL SENDING...")
+            const cacheKey = `word:${word}`;
+            const now = Date.now();
+            const cached = this.cache.get(cacheKey);
+            if (cached && (now - cached.ts) < this.cacheTTL) {
+                console.log('cache hit for', cacheKey);
+                return cached.value;
+            }
+
             const startTime = Date.now();
-            // const response = await fetch(encodeURIComponent(searchUrl));
-            const response = await fetch(searchUrl);
+            const response = await this.fetchWithTimeout(this.proxyUrl + encodeURIComponent(searchUrl));
             console.log("RESPONSE RECEIVED...", Date.now() - startTime);
             const html = await response.text();
             // HTML에서 meta 태그 찾기
@@ -76,13 +97,19 @@ class ChineseTranslationService {
             other_means.push(tmp_means);
             console.log("TIME TAKEN END", Date.now() - startTime);
             // reformat for output
-            return {
-                word:word,
+            const out = {
+                word: word,
                 main_pro: main_pro,
                 main_meanings: main_meanings,
                 other_pros: other_pros,
                 other_means: other_means
+            };
+            try {
+                this.cache.set(cacheKey, { ts: Date.now(), value: out });
+            } catch (e) {
+                // ignore cache set errors
             }
+            return out;
         } catch (error) {
             console.error('검색 페이지 파싱 오류:', error);
             return null;
@@ -111,7 +138,7 @@ class ChineseTranslationService {
         try {
             const searchUrl = `${this.baseUrl}/search.do?q=${encodeURIComponent(word)}&dic=ch`;
             
-            const response = await fetch(this.proxyUrl + encodeURIComponent(searchUrl));
+            const response = await this.fetchWithTimeout(this.proxyUrl + encodeURIComponent(searchUrl));
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
@@ -120,7 +147,7 @@ class ChineseTranslationService {
             const metaTag = doc.querySelector('meta[http-equiv="Refresh"]');
             if (metaTag) {
                 const content = metaTag.getAttribute('content');
-                const urlMatch = content.match(/URL=([^"]+)/);
+                const urlMatch = content.match(/URL=([^\"]+)/);
                 if (urlMatch) {
                     return urlMatch[1]; // /word/view.do?wordid=ckw000086223&q=%E4%BD%A0%E5%A5%BD&supid=cku000087523
                 }
@@ -166,8 +193,7 @@ class ChineseTranslationService {
             }
             // https://dic.daum.net/word/view.do?wordid=ckw000072487&supid=cku000073546
             const detailUrl = `${this.baseUrl}${link}`;
-            // const response = await fetch(this.proxyUrl + encodeURIComponent(detailUrl));
-            const response = await fetch(encodeURIComponent(detailUrl));
+            const response = await this.fetchWithTimeout(this.proxyUrl + encodeURIComponent(detailUrl));
             const html = await response.text();
             
             const parser = new DOMParser();
@@ -194,6 +220,38 @@ class ChineseTranslationService {
             throw error;
         }
 
+    }
+
+    // 다중 단어를 병렬로 번역(간단한 동시성 제어)
+    // words: string[]
+    // progressCb: (currentIndex, total, currentWord) => void
+    // concurrency: number
+    async translateMultipleWords(words, progressCb = null, concurrency = 3) {
+        const results = new Array(words.length);
+        let cursor = 0;
+
+        const worker = async () => {
+            while (true) {
+                const idx = cursor++;
+                if (idx >= words.length) break;
+                const w = words[idx];
+                try {
+                    const res = await this.translateWord(w);
+                    results[idx] = { success: true, ...res };
+                } catch (err) {
+                    results[idx] = { success: false, error: err && err.message ? err.message : String(err) };
+                }
+                if (typeof progressCb === 'function') {
+                    try { progressCb(idx + 1, words.length, w); } catch (e) { /* ignore */ }
+                }
+            }
+        };
+
+        const workers = [];
+        const limit = Math.max(1, Math.min(concurrency, words.length));
+        for (let i = 0; i < limit; i++) workers.push(worker());
+        await Promise.all(workers);
+        return results;
     }
 
 }
