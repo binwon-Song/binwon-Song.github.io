@@ -29,11 +29,17 @@ class ChineseTranslationService {
         try {
             const searchUrl = `${this.baseUrl}/search.do?q=${encodeURIComponent(word)}&dic=ch`;
             
-            const response = await fetch(this.proxyUrl + encodeURIComponent(searchUrl));
+            // check time taken
+            console.log("URL SENDING...")
+            const startTime = Date.now();
+            // const response = await fetch(encodeURIComponent(searchUrl));
+            const response = await fetch(searchUrl);
+            console.log("RESPONSE RECEIVED...", Date.now() - startTime);
             const html = await response.text();
             // HTML에서 meta 태그 찾기
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
+            console.log("HTML PARSED...", Date.now() - startTime);
             
             const box = ".search_box"
             const main_word_box = ".cleanword_type"
@@ -68,7 +74,7 @@ class ChineseTranslationService {
             });
             other_pros.push(tmp_pro);
             other_means.push(tmp_means);
-            
+            console.log("TIME TAKEN END", Date.now() - startTime);
             // reformat for output
             return {
                 word:word,
@@ -160,7 +166,8 @@ class ChineseTranslationService {
             }
             // https://dic.daum.net/word/view.do?wordid=ckw000072487&supid=cku000073546
             const detailUrl = `${this.baseUrl}${link}`;
-            const response = await fetch(this.proxyUrl + encodeURIComponent(detailUrl));
+            // const response = await fetch(this.proxyUrl + encodeURIComponent(detailUrl));
+            const response = await fetch(encodeURIComponent(detailUrl));
             const html = await response.text();
             
             const parser = new DOMParser();
