@@ -27,9 +27,8 @@ class ChineseWordbook {
             cancelEditBtn: document.getElementById('cancelEditBtn'),
             saveEditBtn: document.getElementById('saveEditBtn'),
             editChinese: document.getElementById('editChinese'),
-            editPinyin: document.getElementById('editPinyin'),
-            editYinyus: document.getElementById('editYinyus'),
-            editKorean: document.getElementById('editKorean')
+            editPinyinList: document.getElementById('editPinyinList'),
+            addPinyinBtn: document.getElementById('addPinyinBtn')
         };
     }
 
@@ -49,6 +48,9 @@ class ChineseWordbook {
         this.elements.closeModalBtn.addEventListener('click', () => this.closeModal());
         this.elements.cancelEditBtn.addEventListener('click', () => this.closeModal());
         this.elements.saveEditBtn.addEventListener('click', () => this.saveEdit());
+
+    // 발음 항목 추가 버튼
+    if (this.elements.addPinyinBtn) this.elements.addPinyinBtn.addEventListener('click', () => this._addPinyinEntry());
 
         // 모달 외부 클릭 시 닫기
         this.elements.editModal.addEventListener('click', (e) => {
@@ -331,9 +333,81 @@ class ChineseWordbook {
 
         // 안전하게 요소가 존재할 때만 값 할당 (일부 요소는 선택적일 수 있음)
         if (this.elements.editChinese) this.elements.editChinese.value = word.chinese;
-        if (this.elements.editPinyin) this.elements.editPinyin.value = word.pinyin || '';
-        if (this.elements.editYinyus) this.elements.editYinyus.value = word.yinyus || '';
-        if (this.elements.editKorean) this.elements.editKorean.value = word.korean;
+        // Populate dynamic pinyin list
+        if (this.elements.editPinyinList) {
+            // clear existing
+            this.elements.editPinyinList.innerHTML = '';
+
+            // helper to add entry
+            const addEntry = (pinyin = '', meanings = []) => {
+                const entry = document.createElement('div');
+                entry.className = 'p-3 border rounded-lg bg-white flex flex-col space-y-2';
+
+                const row = document.createElement('div');
+                row.className = 'flex items-start gap-2';
+
+                const pInput = document.createElement('input');
+                pInput.type = 'text';
+                pInput.placeholder = '예: ni3 (nǐ)';
+                pInput.value = pinyin || '';
+                pInput.className = 'flex-1 px-3 py-2 border rounded';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'px-2 py-1 text-sm text-red-500 hover:bg-red-50 rounded';
+                removeBtn.textContent = '삭제';
+                removeBtn.addEventListener('click', () => entry.remove());
+
+                row.appendChild(pInput);
+                row.appendChild(removeBtn);
+
+                const meaningsInput = document.createElement('textarea');
+                meaningsInput.placeholder = '이 병음에 해당하는 한국어 뜻들을 줄바꿈 또는 쉼표로 입력하세요';
+                meaningsInput.className = 'w-full px-3 py-2 border rounded h-20';
+                meaningsInput.value = Array.isArray(meanings) ? meanings.join('\n') : (meanings || '');
+
+                entry.appendChild(row);
+                entry.appendChild(meaningsInput);
+
+                this.elements.editPinyinList.appendChild(entry);
+            };
+
+            // main pinyin
+            if (word.pinyin) {
+                addEntry(word.pinyin, Array.isArray(word.meanings) ? word.meanings : (word.meanings ? word.meanings.split(',').map(s=>s.trim()) : (word.korean ? [word.korean] : [])));
+            } else {
+                addEntry('', []);
+            }
+
+            // other pinyins
+            if (word.other_pros && Array.isArray(word.other_pros)) {
+                // flatten possible nested arrays
+                if (word.other_pros.length > 0 && Array.isArray(word.other_pros[0])) {
+                    word.other_pros.forEach((prosArray, ai) => {
+                        if (!Array.isArray(prosArray)) return;
+                        prosArray.forEach((p, pi) => {
+                            if (!p) return;
+                            let meanings = '';
+                            if (word.other_means && word.other_means[ai] && word.other_means[ai][pi]) {
+                                const m = word.other_means[ai][pi];
+                                meanings = Array.isArray(m) ? m.join('\n') : m;
+                            }
+                            addEntry(p, meanings ? meanings.split('\n').map(s=>s.trim()) : []);
+                        });
+                    });
+                } else {
+                    word.other_pros.forEach((p, i) => {
+                        if (!p) return;
+                        let meanings = '';
+                        if (word.other_means && word.other_means[i]) {
+                            const m = word.other_means[i];
+                            meanings = Array.isArray(m) ? m.join('\n') : m;
+                        }
+                        addEntry(p, meanings ? meanings.split('\n').map(s=>s.trim()) : []);
+                    });
+                }
+            }
+        }
 
         this.elements.editModal.classList.remove('hidden');
         
@@ -348,6 +422,40 @@ class ChineseWordbook {
         setTimeout(() => {
             this.elements.editChinese.focus();
         }, 100);
+    }
+
+    // 내부: 모달에 빈 발음 항목 추가
+    _addPinyinEntry() {
+        if (!this.elements.editPinyinList) return;
+        const entry = document.createElement('div');
+        entry.className = 'p-3 border rounded-lg bg-white flex flex-col space-y-2';
+
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-2';
+
+        const pInput = document.createElement('input');
+        pInput.type = 'text';
+        pInput.placeholder = '예: ni3 (nǐ)';
+        pInput.className = 'flex-1 px-3 py-2 border rounded';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'px-2 py-1 text-sm text-red-500 hover:bg-red-50 rounded';
+        removeBtn.textContent = '삭제';
+        removeBtn.addEventListener('click', () => entry.remove());
+
+        row.appendChild(pInput);
+        row.appendChild(removeBtn);
+
+        const meaningsInput = document.createElement('textarea');
+        meaningsInput.placeholder = '이 병음에 해당하는 한국어 뜻들을 줄바꿈 또는 쉼표로 입력하세요';
+        meaningsInput.className = 'w-full px-3 py-2 border rounded h-20';
+
+        entry.appendChild(row);
+        entry.appendChild(meaningsInput);
+
+        this.elements.editPinyinList.appendChild(entry);
+        pInput.focus();
     }
 
     closeModal() {
@@ -366,8 +474,28 @@ class ChineseWordbook {
         if (this.currentEditIndex === -1) return;
 
         const chinese = this.elements.editChinese.value.trim();
-        const pinyin = this.elements.editPinyin.value.trim();
-        const korean = this.elements.editKorean.value.trim();
+        // collect pinyin entries
+        const pinyinEntries = [];
+        if (this.elements.editPinyinList) {
+            const entries = this.elements.editPinyinList.children;
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const pInput = entry.querySelector('input');
+                const mInput = entry.querySelector('textarea');
+                if (!pInput) continue;
+                const ptxt = pInput.value.trim();
+                const mtxt = mInput ? mInput.value.trim() : '';
+                if (ptxt.length === 0 && mtxt.length === 0) continue; // skip empty
+                // split meanings by newline or comma
+                let meaningsArr = [];
+                if (mtxt) {
+                    meaningsArr = mtxt.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                }
+                pinyinEntries.push({ pinyin: ptxt, meanings: meaningsArr });
+            }
+        }
+
+        const korean = pinyinEntries.length > 0 && pinyinEntries[0].meanings.length > 0 ? pinyinEntries[0].meanings.join(', ') : '';
 
         if (!chinese || !korean) {
             this.showNotification('중국어와 한국어 뜻은 필수 입력 항목입니다.', 'warning');
@@ -384,13 +512,30 @@ class ChineseWordbook {
             return;
         }
 
-        this.words[this.currentEditIndex] = {
-            ...this.words[this.currentEditIndex],
-            chinese: chinese,
-            pinyin: pinyin || '[병음 없음]',
-            korean: korean,
-            updatedAt: new Date().toISOString()
-        };
+        // Build updated word object preserving ids
+        const updated = { ...this.words[this.currentEditIndex] };
+        updated.chinese = chinese;
+        if (pinyinEntries.length > 0) {
+            updated.pinyin = pinyinEntries[0].pinyin || '[병음 없음]';
+            updated.meanings = pinyinEntries[0].meanings && pinyinEntries[0].meanings.length > 0 ? pinyinEntries[0].meanings : (updated.meanings || []);
+            updated.korean = updated.meanings && updated.meanings.length > 0 ? updated.meanings.join(', ') : (updated.korean || '');
+
+            const other_pros = [];
+            const other_means = [];
+            for (let i = 1; i < pinyinEntries.length; i++) {
+                const e = pinyinEntries[i];
+                other_pros.push(e.pinyin);
+                other_means.push(e.meanings && e.meanings.length > 0 ? e.meanings : []);
+            }
+            updated.other_pros = other_pros;
+            updated.other_means = other_means;
+        } else {
+            // no pinyin entries — keep existing or set defaults
+            updated.pinyin = updated.pinyin || '[병음 없음]';
+        }
+        updated.updatedAt = new Date().toISOString();
+
+        this.words[this.currentEditIndex] = updated;
 
         this.saveWords();
         this.updateWordTable();

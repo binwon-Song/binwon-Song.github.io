@@ -182,20 +182,14 @@
                     >
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">병음</label>
-                    <input 
-                        type="text" 
-                        id="editPinyin" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300"
-                    >
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">한국어 뜻</label>
-                    <input 
-                        type="text" 
-                        id="editKorean" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">발음(병음) 및 뜻 — 여러 항목 추가 가능</label>
+                    <div id="editPinyinList" class="space-y-3">
+                        <!-- 동적으로 발음+뜻 항목이 추가됩니다 -->
+                    </div>
+                    <div class="mt-2">
+                        <button id="addPinyinBtn" type="button" class="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">발음 추가</button>
+                        <p class="text-xs text-gray-500 mt-2">각 항목은 병음과 해당 병음의 한국어 뜻(여러 줄 또는 쉼표 구분)을 가질 수 있습니다.</p>
+                    </div>
                 </div>
             </div>
             
