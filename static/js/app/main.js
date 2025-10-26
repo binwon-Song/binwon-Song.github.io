@@ -329,10 +329,11 @@ class ChineseWordbook {
         this.currentEditIndex = index;
         const word = this.words[index];
 
-        this.elements.editChinese.value = word.chinese;
-        this.elements.editPinyin.value = word.pinyin || '';
-        this.elements.editYinyus.value = word.yinyus || '';
-        this.elements.editKorean.value = word.korean;
+        // 안전하게 요소가 존재할 때만 값 할당 (일부 요소는 선택적일 수 있음)
+        if (this.elements.editChinese) this.elements.editChinese.value = word.chinese;
+        if (this.elements.editPinyin) this.elements.editPinyin.value = word.pinyin || '';
+        if (this.elements.editYinyus) this.elements.editYinyus.value = word.yinyus || '';
+        if (this.elements.editKorean) this.elements.editKorean.value = word.korean;
 
         this.elements.editModal.classList.remove('hidden');
         

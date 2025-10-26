@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-    <div id="app" class="container mx-auto px-4 py-8 pb-16">
+    <div id="app" class="container mx-auto px-4 py-8 pb-24">
         <div class="max-w-6xl mx-auto">
             <!-- 헤더 섹션 -->
             <!-- 단어 추가 카드 -->
@@ -151,6 +151,16 @@
             </div>
         </div>
     </div>
+
+    <!-- 개발 버전 배지 (우측 상단) -->
+    <div id="devBadge" class="fixed top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium shadow-lg z-50">
+        수정일자: 2025.10.27
+    </div>
+
+    <!-- 사이트 푸터 (화면 하단에 고정) -->
+    <footer id="siteFooter" class="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-500 py-3 bg-white/90 backdrop-blur-md shadow-md z-50">
+        ⓒ 2025.binwon-Song All Rights Reserved. (>_<)
+    </footer>
 
     <!-- 수정 모달 -->
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
