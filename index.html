@@ -1,259 +1,201 @@
+
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
+    <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>중국어 단어장</title>
-    
-    <!-- GitHub Pages 호환성 메타 태그 -->
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="중국어 단어장 웹 애플리케이션">
-    
-    <!-- Tailwind CSS -->
+    <title>Binwon Song</title>
+    <meta name="description" content="binwon Song's personal portfolio showcasing projects and skills.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a'
-                        }
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981"
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    
-    <!-- 외부 라이브러리 -->
-    <script src="https://unpkg.com/feather-icons"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <!-- 커스텀 CSS -->
-    <link rel="stylesheet" href="static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-    <div id="app" class="container mx-auto px-4 py-8 pb-24">
-        <div class="max-w-6xl mx-auto">
-            <!-- 헤더 섹션 -->
-            <!-- 단어 추가 카드 -->
-            <div class="glass-effect rounded-2xl shadow-xl p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1">
-                        <label for="chineseInput" class="block text-sm font-medium text-gray-700 mb-2">
-                            중국어 단어
-                        </label>
-                        <input 
-                            type="text" 
-                            id="chineseInput" 
-                            placeholder="예: 你好, 谢谢, 再见" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 text-lg"
-                        >
-                    </div>
-                    <div class="flex items-end">
-                        <button 
-                            id="addBtn" 
-                            class="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                        >
-                            <i data-feather="plus" class="w-5 h-5 mr-2"></i> 
-                            단어 추가
-                        </button>
-                    </div>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
+    <!-- Navigation -->
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-600 hover:text-primary transition-colors duration-200">Home</a>
+                    <a href="#about" class="text-gray-600 hover:text-primary transition-colors duration-200">About</a>
+                    <a href="#projects" class="text-gray-600 hover:text-primary transition-colors duration-200">Projects</a>
+                    <a href="./static/files/baseball.txt" download="baseball.txt" class="text-red-500 hover:text-red-300 transition-colors duration-200" aria-label="Download file">FILE DOWNLOAD</a>
                 </div>
+                <button class="md:hidden text-gray-600">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
+        </nav>
+    </header>
 
-            <!-- 단어 목록 -->
-            <div id="wordTableContainer" class="glass-effect rounded-2xl shadow-xl overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-                <!-- 고정 헤더 -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gradient-to-r from-primary-500 to-primary-600 text-white sticky top-0 z-10">
-                            <tr>
-                                <th class="px-4 py-4 text-center text-sm font-semibold uppercase tracking-wider w-1/5">
-                                    중국어
-                                </th>
-                                <th class="px-4 py-4 text-center text-sm font-semibold uppercase tracking-wider w-1/5">
-                                    병음
-                                </th>
-                                <th class="px-4 py-4 text-center text-sm font-semibold uppercase tracking-wider w-2/5">
-                                    한국어 뜻
-                                </th>
-                                <th class="px-4 py-4 text-center text-sm font-semibold uppercase tracking-wider w-1/6">작업</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-                
-                <!-- 스크롤 가능한 본문 -->
-                <div class="overflow-y-auto max-h-[32rem] overflow-x-auto">
-                    <table class="min-w-full">
-                        <tbody id="wordTableBody" class="bg-white">
-                            <!-- 단어들이 여기에 추가됩니다 -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- 빈 상태 -->
-                <div id="emptyState" class="p-16 text-center bg-white">
-                    <div class="max-w-sm mx-auto">
-                        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                            <i data-feather="book-open" class="w-12 h-12 text-gray-400"></i>
+    <main>
+        <!-- Hero + About/Education Side Panel -->
+        <section id="home" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-5 items-start lg:items-center pl-20 pr-20">
+                    <!-- Hero (left / main) -->
+                    <div class="col-span-1 lg:col-span-3 lg:col-start-1 flex flex-col items-start justify-center h-full">
+                        <div class="flex items-center gap-6">
+                            <div class="relative">
+                                <div class="w-40 h-40 bg-primary/10 rounded-full absolute -top-1 -left-1 hidden md:block"></div>
+                                <img 
+                                    src="./static/image/bw_notion.png" 
+                                    alt="Binwon Song profile picture" 
+                                    class="w-40 h-40 md:w-64 md:h-64 rounded-full object-cover relative z-10 shadow-xl"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="flex-1 pl-10">
+                                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Hi, I'm 
+                                    <div class="text-green-700">Binwon Song</div></h1>
+                                <div class="flex space-x-5">
+                                    
+                                    <a href="https://github.com/binwon-Song" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="inline-block">
+                                        <i class="fab fa-github text-3xl md:text-5xl text-gray-700 hover:text-green-700 transition-colors" aria-hidden="true"></i>
+                                    </a>
+
+                                    <a href="https://www.linkedin.com/in/binwon-Song" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="inline-block ml-3">
+                                        <i class="fab fa-linkedin text-3xl md:text-5xl text-gray-700 hover:text-green-700 transition-colors" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">단어장이 비어있습니다</h3>
-                        <p class="text-gray-500">첫 번째 중국어 단어를 추가해보세요!</p>
+                    </div>
+
+                    <!-- Side panel: About + Education (right) -->
+                    <aside class="lg:col-span-2">
+                        <div id="about" class="glass-effect rounded-xl p-4">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">About Me</h3>
+                            <p class=" text-m leading-relaxed">
+                                I'm a master's student at Chungbuk National University focusing on optimization and scheduling. 
+                            </p>
+                            
+                            <div class="mt-4 text-m">
+                                <div>
+                                    <strong>Location:</strong> Cheong Ju, South Korea
+                                </div>
+                                <div><strong>Email:</strong> binwon236[at]gmail.com</div>
+                            </div>
+                        </div>
+
+                        <div id="education" class="glass-effect rounded-xl p-4">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">
+                                Education
+                            </h3>
+                            <div class="text-m text-gray-700">
+                                <div class="mb-3">
+                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium">Chungbuk National University</span>
+                                    <div class="text-gray-500">M.S - CSLAB advised by Heeseung Jo (2025 - Present)</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium">Chungbuk National University</span>
+                                    <div class="text-gray-500">B.Sc. — Computer Science (2019 - 2025)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- Publications Section -->
+        <section id="publications" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center text-gray-800 mb-12">Publications</h2>
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h3 class="font-semibold text-lg">NiceSched: memory access locality aware dynamic nice scheduling in tiered memory</h3>
+                        <div class="text-sm text-gray-500">HiPC 2025 (BK IF: 1) — author</div>
+                        <p class="mt-3 text-gray-700 text-sm">We propose a new scheduling method with dynamic nice value adjustment in tiered memory system</p>
                     </div>
                 </div>
             </div>
-            
-            <!-- 컨트롤 버튼 -->
-            <div id="controls" class="mt-8 hidden flex flex-wrap justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
-                <!-- <button 
-                    id="retranslateAllBtn" 
-                    class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    onclick="wordbook.retranslateAll()"
-                >
-                    <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i> 
-                    전체 재번역
-                </button> -->
-                
-                <button 
-                    id="exportBtn" 
-                    class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    onclick="wordbook && wordbook.exportData()"
-                >
-                    <i data-feather="download" class="w-5 h-5 mr-2"></i> 
-                    복사하기
-                </button>
-                
-                <!-- <label class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
-                    <i data-feather="upload" class="w-5 h-5 mr-2"></i> 
-                    가져오기
-                    <input type="file" accept=".json" class="hidden" onchange="if(this.files.length) wordbook.importData(this.files[0])">
-                </label> -->
-                
-                <button 
-                    id="clearAllBtn" 
-                    class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                    <i data-feather="trash-2" class="w-5 h-5 mr-2"></i> 
-                    전체 삭제
-                </button>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 개발 버전 배지 (우측 상단) -->
-    <div id="devBadge" class="fixed top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium shadow-lg z-50">
-        수정일자: 2025.10.27
-    </div>
+        <!-- (About moved into Hero side panel) -->
 
-    <!-- 사이트 푸터 (화면 하단에 고정) -->
-    <footer id="siteFooter" class="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-500 py-3 bg-white/90 backdrop-blur-md shadow-md z-50">
-        ⓒ 2025.binwon-Song All Rights Reserved. (>_<)
-    </footer>
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center text-gray-800 mb-16">Featured Projects</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project 1 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <img 
+                            src="https://picsum.photos/400/250?random=2" 
+                            alt="E-commerce Platform Project" 
+                            class="w-full h-48 object-cover"
+                            loading="lazy"
+                        />
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">add Longest Prefix Match scheduling in vLLM</h3>
+                            <div>
+                                <p id="proj-desc-summary-1" class="text-gray-600 mb-1">
+                                    current vLLM scheduling method is based on FCFS, which may lead to suboptimal performance for certain workloads...
+                                </p>
 
-    <!-- 수정 모달 -->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-lg transform transition-all duration-300 scale-95">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">단어 수정</h3>
-                <button id="closeModalBtn" class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
-                    <i data-feather="x" class="w-6 h-6 text-gray-500"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">중국어</label>
-                    <input 
-                        type="text" 
-                        id="editChinese" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300"
-                    >
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">발음(병음) 및 뜻 — 여러 항목 추가 가능</label>
-                    <div id="editPinyinList" class="space-y-3">
-                        <!-- 동적으로 발음+뜻 항목이 추가됩니다 -->
-                    </div>
-                    <div class="mt-2">
-                        <button id="addPinyinBtn" type="button" class="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">발음 추가</button>
-                        <p class="text-xs text-gray-500 mt-2">각 항목은 병음과 해당 병음의 한국어 뜻(여러 줄 또는 쉼표 구분)을 가질 수 있습니다.</p>
+                                <div id="proj-desc-full-1" class="text-gray-600 mb-1 hidden">
+                                    current vLLM scheduling method is based on FCFS, which may lead to suboptimal performance for certain workloads.
+                                    To address this, I ported Longest Prefix Match (LPM) scheduling, which prioritizes requests based on the length of their matching prefixes. 
+                                    This approach aims to improve overall system throughput and reduce latency for specific request patterns.
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="proj-toggle-1"
+                                    aria-expanded="false"
+                                    class="text-sm text-gray-600 hover:underline mb-4"
+                                >
+                                    자세히 보기
+                                </button>
+
+                                <script>
+                                    (function () {
+                                        const btn = document.getElementById('proj-toggle-1');
+                                        const full = document.getElementById('proj-desc-full-1');
+                                        const summary = document.getElementById('proj-desc-summary-1');
+
+                                        btn.addEventListener('click', () => {
+                                            const expanded = btn.getAttribute('aria-expanded') === 'true';
+                                            if (expanded) {
+                                                full.classList.add('hidden');
+                                                summary.classList.remove('hidden');
+                                                btn.setAttribute('aria-expanded', 'false');
+                                                btn.textContent = '자세히 보기';
+                                            } else {
+                                                full.classList.remove('hidden');
+                                                summary.classList.add('hidden');
+                                                btn.setAttribute('aria-expanded', 'true');
+                                                btn.textContent = '간단히 보기';
+                                            }
+                                        });
+                                    })();
+                                </script>
+                            </div>
+                            <a href="https://github.com/binwon-Song/vllm" class="text-primary hover:underline text-right block">View Project</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-8 flex justify-end space-x-4">
-                <button 
-                    id="cancelEditBtn" 
-                    class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium"
-                >
-                    취소
-                </button>
-                <button 
-                    id="saveEditBtn" 
-                    class="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl transition-all duration-300 font-medium shadow-lg"
-                >
-                    저장
-                </button>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 커스텀 JavaScript -->
-    <script>
-        // 파일 로딩 에러 처리
-        window.addEventListener('error', function(e) {
-            if (e.target.tagName === 'SCRIPT') {
-                console.error('스크립트 로딩 실패:', e.target.src);
-                document.body.innerHTML += '<div style="position:fixed;top:10px;left:10px;background:red;color:white;padding:10px;z-index:9999;">스크립트 로딩 실패: ' + e.target.src + '</div>';
-            }
-        }, true);
-        
-        // 기본 로딩 표시
-        console.log('페이지 로딩 시작...');
-    </script>
-    
-    <script src="static/js/ui/ui-utils.js" onerror="console.error('ui-utils.js 로딩 실패')"></script>
-    <script src="static/js/services/translation-service.js" onerror="console.error('translation-service.js 로딩 실패')"></script>
-    <script src="static/js/app/main.js" onerror="console.error('main.js 로딩 실패')"></script>
-    
-    <script>
-        // 스크립트 로딩 완료 후 초기화
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM 로딩 완료');
-            
-            // Feather 아이콘 초기화
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
-            
-            // AOS 애니메이션 초기화
-            if (typeof AOS !== 'undefined') {
-                AOS.init({
-                    duration: 800,
-                    once: true,
-                    offset: 100
-                });
-            }
-            
-            // 앱 초기화 확인
-            setTimeout(() => {
-                if (typeof window.wordbook === 'undefined') {
-                    document.body.innerHTML += '<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:orange;color:white;padding:20px;z-index:9999;border-radius:10px;">앱 초기화 실패 - 스크립트 파일을 확인해주세요</div>';
-                }
-            }, 2000);
-        });
-    </script>
+    </main>
 </body>
 </html>
