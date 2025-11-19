@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <base target="_self">
     <meta charset="UTF-8">
@@ -27,7 +27,7 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
+<body class="min-h-screen bg-gradient-to-br font-sans">
     <!-- Navigation -->
     <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <nav class="container mx-auto px-6 py-4">
@@ -36,23 +36,37 @@
                     <a href="#home" class="text-gray-600 hover:text-primary transition-colors duration-200">Home</a>
                     <a href="#about" class="text-gray-600 hover:text-primary transition-colors duration-200">About</a>
                     <a href="#projects" class="text-gray-600 hover:text-primary transition-colors duration-200">Projects</a>
-                    <a href="./static/files/baseball.txt" download="baseball.txt" class="text-red-500 hover:text-red-300 transition-colors duration-200" aria-label="Download file">FILE DOWNLOAD</a>
+                    <a href="#publication" class="text-gray-600 hover:text-primary transition-colors duration-200">Publications</a>
+                    <!-- <a href="./static/files/baseball.txt" download="baseball.txt" class="text-red-500 hover:text-red-300 transition-colors duration-200" aria-label="Download file">FILE DOWNLOAD</a> -->
                 </div>
-                <button class="md:hidden text-gray-600">
+                <button class="md:hidden text-gray-600" aria-label="Open Menu" onclick="document.querySelector('.dropdown').classList.toggle('hidden').classList.toggle('translate-x-50')">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
+                
             </div>
+            <div id="" class="dropdown hidden">
+                    <ul
+                        tabindex="-1"
+                        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 mb-4">
+                        <li class="mb-4"><a href="#home" class="text-gray-600 hover:text-primary transition-colors duration-200">Home</a></li>
+                        <li class="mb-4"><a href="#about" class="text-gray-600 hover:text-primary transition-colors duration-200">About</a></li>
+                        <li class="mb-4"><a href="#publication" class="text-gray-600 hover:text-primary transition-colors duration-200">Publications</a></li>
+                        <li class="mb-4"><a href="#projects" class="text-gray-600 hover:text-primary transition-colors duration-200">Projects</a></li>
+                        <!-- <li><a href="./static/files/baseball.txt" download="baseball.txt" class="text-red-500 hover:text-red-300 transition-colors duration-200" aria-label="Download file">FILE DOWNLOAD</a></li> -->
+                    </ul>
+        </div>
         </nav>
     </header>
 
     <main>
+        
         <!-- Hero + About/Education Side Panel -->
         <section id="home" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="grid grid-cols-1 lg:grid-cols-5 items-start lg:items-center">
                     <!-- Hero (left / main) -->
                     <div class="col-span-1 lg:col-span-3 lg:col-start-1 flex flex-col items-start justify-center h-full">
-                        <div class="flex items-center gap-6">
+                        <div class="flex flex-col md:flex-row items-center md:items-center gap-6 w-full">
                             <div class="relative">
                                 <div class="w-40 h-40 bg-primary/10 rounded-full absolute -top-1 -left-1 hidden md:block"></div>
                                 <img 
@@ -63,9 +77,9 @@
                                 />
                             </div>
                             <div class="flex-1 pl-10">
-                                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Hi, I'm 
+                                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 text-start">Hi, I'm 
                                     <div class="text-green-700">Binwon Song</div></h1>
-                                <div class="flex space-x-5">
+                                <div class="flex space-x-5 gap-10 mt-10">
                                     
                                     <a href="https://github.com/binwon-Song" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="inline-block">
                                         <i class="fab fa-github text-3xl md:text-5xl text-gray-700 hover:text-green-700 transition-colors" aria-hidden="true"></i>
@@ -82,12 +96,12 @@
                     <!-- Side panel: About + Education (right) -->
                     <aside class="lg:col-span-2">
                         <div id="about" class="glass-effect rounded-xl p-4">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-3">About Me</h3>
-                            <p class=" text-m leading-relaxed">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-3">About Me</h3>
+                            <p class=" text-xl leading-relaxed">
                                 I'm a master's student at Chungbuk National University focusing on optimization and scheduling. 
                             </p>
                             
-                            <div class="mt-4 text-m">
+                            <div class="mt-4 text-lg">
                                 <div>
                                     <strong>Location:</strong> Cheong Ju, South Korea
                                 </div>
@@ -96,17 +110,17 @@
                         </div>
 
                         <div id="education" class="glass-effect rounded-xl p-4">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-3">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-3">
                                 Education
                             </h3>
-                            <div class="text-m text-gray-700">
+                            <div class="text-gray-700">
                                 <div class="mb-3">
-                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium">Chungbuk National University</span>
-                                    <div class="text-gray-500">M.S - CSLAB advised by Heeseung Jo (2025 - Present)</div>
+                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium text-xl">Chungbuk National University</span>
+                                    <div class="text-gray-500 text-lg">M.S - CSLAB advised by Heeseung Jo (2025 - Present)</div>
                                 </div>
                                 <div>
-                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium">Chungbuk National University</span>
-                                    <div class="text-gray-500">B.Sc. — Computer Science (2019 - 2025)</div>
+                                    <i class="fas fa-graduation-cap mr-2"></i><span class="font-medium text-xl">Chungbuk National University</span>
+                                    <div class="text-gray-500 text-lg">B.S — Computer Science (2019 - 2025)</div>
                                 </div>
                             </div>
                         </div>
