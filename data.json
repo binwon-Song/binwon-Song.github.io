@@ -1,0 +1,18 @@
+{
+    "publications": [
+        {
+            "title": "NiceSched: memory access locality aware dynamic nice scheduling in tiered memory",
+            "conference": "HiPC 2025 (BK IF: 1) — author",
+            "description": "We propose a new scheduling method with dynamic nice value adjustment in tiered memory system"
+        }
+    ],
+    "projects": [
+        {
+            "title": "add Longest Prefix Match scheduling in vLLM",
+            "image": "https://picsum.photos/400/250?random=2",
+            "summary": "current vLLM scheduling method is based on FCFS, which may lead to suboptimal performance for certain workloads...",
+            "description": "current vLLM scheduling method is based on FCFS, which may lead to suboptimal performance for certain workloads. To address this, I ported Longest Prefix Match (LPM) scheduling, which prioritizes requests based on the length of their matching prefixes. This approach aims to improve overall system throughput and reduce latency for specific request patterns.",
+            "link": "https://github.com/binwon-Song/vllm"
+        }
+    ]
+}
