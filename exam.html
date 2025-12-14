@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프랑스 문화 예술 퀴즈 마스터 V3.1</title>
+    <title>프랑스 문화 예술 퀴즈 마스터 V3.2</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -186,7 +186,7 @@
         </div>
     </div>
 
-    <!-- 5. RESULT SCREEN -->
+    <!-- 5. RESULT SCREEN (HTML Fixed) -->
     <div id="screen-result" class="screen">
         <h2>결과 확인</h2>
         <div class="score-circle">
@@ -194,10 +194,20 @@
             <span class="score-label" id="totalScoreLabel">/ 0</span>
         </div>
         <p id="resultMessage">수고하셨습니다.</p>
+        
+        <!-- 오답 수 표시 및 복습 버튼 -->
         <div id="review-section" style="width: 100%; display: none;">
-            <button class="btn btn-danger" onclick="startReviewLoop()">↺ 틀린 문제만 다시 풀기</button>
+            <p style="color: var(--danger); font-size: 15px; margin-bottom: 15px; background: #fef2f2; padding: 10px; border-radius: 10px;">
+                이번에 <strong><span id="wrongCount">0</span>문제</strong>를 틀렸습니다.<br>완벽하게 암기할 때까지 반복해볼까요?
+            </p>
+            <button class="btn btn-danger" onclick="startReviewLoop()">
+                ↺ 틀린 문제만 다시 풀기
+            </button>
         </div>
-        <button class="btn btn-outline" onclick="goHome()" style="margin-top: 10px;">🏠 홈으로</button>
+        
+        <button class="btn btn-outline" onclick="goHome()" style="margin-top: 15px;">
+            🏠 홈으로
+        </button>
     </div>
 </div>
 
@@ -270,7 +280,7 @@
         { c: "루아르 고성", q: "블루아 성의 가스통 관은 17세기 어떤 양식인가?", a: "고전주의", e: "만사르가 설계했습니다." },
 
         // [56-70] 음식과 와인 (기본)
-        { c: "음식과 와인", q: "1월 6일 페브를 넣어 먹는 빵의 이름은?", a: "갈레뜨 데 루아", e: "페브를 찾으면 왕이 됩니다." },
+        { c: "음식과 와인", q: "1월 6일 페브를 넣어 먹는 빵의 이름은?", a: "갈레뜨 데 루아", e: "페브를 찾은 사람이 그날의 왕이 됩니다." },
         { c: "음식과 와인", q: "푸른 곰팡이가 있는 양젖 치즈는?", a: "로크포르", e: "세계 3대 블루 치즈입니다." },
         { c: "음식과 와인", q: "부르고뉴의 달팽이 요리는?", a: "에스까르고", e: "버터와 허브로 요리합니다." },
         { c: "음식과 와인", q: "거위 간 요리의 이름은?", a: "푸아그라", e: "프랑스의 대표적 진미입니다." },
@@ -307,7 +317,7 @@
         { c: "기타", q: "로망어는 어떤 언어가 민중 사이에서 변형된 것인가?", a: "라틴어", e: "대중 라틴어에서 유래했습니다." },
         { c: "기타", q: "TV5 Monde는 세계 몇 위 규모의 방송 네트워크인가?", a: "3위", e: "프랑스어권 최대 방송입니다." },
         { c: "기타", q: "알리앙스 프랑세즈의 설립 목적은 프랑스의 무엇을 결집시키는 것?", a: "친구", e: "친프랑스 인사를 양성하는 것입니다." },
-        { c: "기타", q: "인상주의 화가들이 야외로 나갈 수 있게 해준 발명품은?", a: "튜브 물감", e: "휴대가 간편해졌습니다." },
+        { c: "기타", q: "인상주의 화가들의 야외로 나갈 수 있게 해준 발명품은?", a: "튜브 물감", e: "휴대가 간편해졌습니다." },
         { c: "기타", q: "모네가 수련을 그린 연못이 있는 마을은?", a: "지베르니", e: "일본풍 다리가 있는 정원입니다." },
         { c: "기타", q: "고흐가 <감자 먹는 사람들>을 그린 시기는?", a: "누에넨 시절 (초기)", e: "어둡고 사실적인 화풍입니다." },
         { c: "기타", q: "프랑스에서 가장 긴 강은?", a: "루아르 강", e: "1000km가 넘습니다." },
@@ -433,82 +443,19 @@
 
     const allQuestions = rawQuestions.map((q, idx) => ({ ...q, id: idx }));
 
-    // --- SUMMARY DATA ---
+    // --- SUMMARY DATA (Tabs) ---
     const summaryData = {
-        'history': {
-            title: '🏛️ 언어와 역사',
-            content: `
-                <ul>
-                    <li><strong>스트라스부르 서약(842)</strong>: 갈로 로망어로 된 최초 문헌. 루이 2세-샤를 2세 동맹.</li>
-                    <li><strong>빌레르 코트레 칙령(1539)</strong>: 프랑수아 1세. 공문서 프랑스어 통일.</li>
-                    <li><strong>아카데미 프랑세스(1635)</strong>: 리슐리외. '이모르텔(불멸)' 회원. 사전 편찬.</li>
-                    <li><strong>페리 법안(1880s)</strong>: 쥘 페리. 무상/의무/세속 교육. 프랑스어 보급.</li>
-                    <li><strong>투봉법(1994)</strong>: 공적 영역 프랑스어 의무화.</li>
-                    <li><strong>라 프랑코포니</strong>: 오네짐 르클뤼(용어 창시). OIF(국제기구). 알리앙스 프랑세즈(폴 캉봉).</li>
-                </ul>
-            `
-        },
-        'geo': {
-            title: '🌍 지리와 해외령',
-            content: `
-                <ul>
-                    <li><strong>본토</strong>: 육각형(L'Hexagone). 96개 도.</li>
-                    <li><strong>해외 도(DROM)</strong>: 과들루프, 마르티니크(조세핀), 기아나(우주센터/빠삐용), 레위니옹, 마요트.</li>
-                    <li><strong>해외 집합체(COM)</strong>: 폴리네시아(타이티/CFP프랑), 생피에르 미클롱(캐나다 연안).</li>
-                    <li><strong>특별 공동체</strong>: 누벨 칼레도니아(니켈 4위).</li>
-                    <li><strong>EEZ</strong>: 세계 1-2위. "태양은 지지 않는다"(알랭 뤼씨오).</li>
-                </ul>
-            `
-        },
-        'art': {
-            title: '🎨 인상주의',
-            content: `
-                <ul>
-                    <li><strong>마네</strong>: &lt;풀밭 위의 점심&gt;(낙선전), &lt;올랭피아&gt;(빅토린 뫼랑).</li>
-                    <li><strong>모네</strong>: &lt;인상, 해돋이&gt;(루이 르로이 혹평), 르 아브르, 카미유, 지베르니(수련).</li>
-                    <li><strong>고흐</strong>: 아를(노란 집, 고갱, 펠릭스 레이), 오베르(가셰 박사, 라부 여관), 테오(동생).</li>
-                </ul>
-            `
-        },
-        'castle': {
-            title: '🏰 루아르 고성',
-            content: `
-                <ul>
-                    <li><strong>샹보르</strong>: 최대 규모. 다빈치 계단. 도롱뇽.</li>
-                    <li><strong>쉬농소</strong>: 여인들의 성. 디안느 vs 카트린느(포크/아티초크). 1차대전 병원.</li>
-                    <li><strong>앙부아즈</strong>: 샤를 8세 사망. 다빈치 묘. 신교도 학살(음모).</li>
-                    <li><strong>블루아</strong>: 건축 박물관. 루이 12세(고슴도치). 외부 나선 계단.</li>
-                </ul>
-            `
-        },
-        'food': {
-            title: '🍷 음식과 와인',
-            content: `
-                <ul>
-                    <li><strong>음식</strong>: 갈레뜨 데 루아(페브), 푸아그라, 에스까르고, 부이야베스(어부), 코코뱅(수탉).</li>
-                    <li><strong>치즈</strong>: 로크포르(양젖), 에망딸(구멍).</li>
-                    <li><strong>와인</strong>: 보르도(1855 등급), 부르고뉴(단일품종), 샴페인(동 페리뇽, 퐁파두르 부인).</li>
-                </ul>
-            `
-        },
-        'chanel': {
-            title: '👗 코코 샤넬',
-            content: `
-                <ul>
-                    <li><strong>생애</strong>: 오바진 고아원, 보이 카펠, 캉봉 거리 21. 리츠 호텔 사망.</li>
-                    <li><strong>스타일</strong>: LBD(포드), 트위드(웨스트민스터), 2.55백, 저지, 커스텀 주얼리.</li>
-                    <li><strong>상징</strong>: 사자(8월), 카멜리아, No.5.</li>
-                </ul>
-            `
-        }
+        'history': { title: '🏛️ 언어와 역사', content: `<ul><li><strong>스트라스부르 서약(842)</strong>: 갈로 로망어로 된 최초 문헌.</li><li><strong>빌레르 코트레 칙령(1539)</strong>: 프랑수아 1세. 공문서 프랑스어 통일.</li><li><strong>아카데미 프랑세스(1635)</strong>: 리슐리외. '이모르텔' 회원.</li><li><strong>페리 법안(1880s)</strong>: 쥘 페리. 무상/의무/세속 교육.</li><li><strong>투봉법(1994)</strong>: 공적 영역 프랑스어 의무화.</li><li><strong>라 프랑코포니</strong>: 오네짐 르클뤼(용어). OIF(국제기구). 알리앙스 프랑세즈(폴 캉봉).</li></ul>` },
+        'geo': { title: '🌍 지리와 해외령', content: `<ul><li><strong>본토</strong>: 육각형(L'Hexagone). 96개 도.</li><li><strong>해외 도(DROM)</strong>: 과들루프, 마르티니크, 기아나, 레위니옹, 마요트.</li><li><strong>해외 집합체(COM)</strong>: 폴리네시아(타이티), 생피에르 미클롱.</li><li><strong>특별 공동체</strong>: 누벨 칼레도니아(니켈 4위).</li></ul>` },
+        'art': { title: '🎨 인상주의', content: `<ul><li><strong>마네</strong>: &lt;풀밭 위의 점심&gt;, &lt;올랭피아&gt;.</li><li><strong>모네</strong>: &lt;인상, 해돋이&gt;, 루이 르로이 혹평, 지베르니(수련).</li><li><strong>고흐</strong>: 아를(노란 집), 고갱, 펠릭스 레이(귀), 오베르(가셰 박사).</li></ul>` },
+        'castle': { title: '🏰 루아르 고성', content: `<ul><li><strong>샹보르</strong>: 최대 규모. 다빈치 계단. 도롱뇽.</li><li><strong>쉬농소</strong>: 여인들의 성. 디안느 vs 카트린느.</li><li><strong>앙부아즈</strong>: 샤를 8세 사망. 다빈치 묘.</li><li><strong>블루아</strong>: 건축 박물관. 루이 12세.</li></ul>` },
+        'food': { title: '🍷 음식과 와인', content: `<ul><li><strong>음식</strong>: 갈레뜨 데 루아, 푸아그라, 에스까르고.</li><li><strong>치즈</strong>: 로크포르(양젖), 에망딸(구멍).</li><li><strong>와인</strong>: 보르도(1855 등급), 부르고뉴(단일품종), 샴페인.</li></ul>` },
+        'chanel': { title: '👗 코코 샤넬', content: `<ul><li><strong>생애</strong>: 오바진 고아원, 보이 카펠, 캉봉 거리.</li><li><strong>스타일</strong>: LBD, 트위드, 2.55백, 저지.</li><li><strong>상징</strong>: 사자, 카멜리아, No.5.</li></ul>` }
     };
 
-    // --------------------------------------------------------
-    // APP LOGIC
-    // --------------------------------------------------------
-    let quizData = [], currentQuestionIndex = 0, score = 0, sessionWrongAnswers = [], isReviewMode = false;
-    const LS_KEY = 'french_quiz_stats_v3';
-    let globalStats = {};
+    // --- LOGIC ---
+    let quizData = [], currentQuestionIndex = 0, score = 0, sessionWrongAnswers = [], isReviewMode = false, globalStats = {};
+    const LS_KEY = 'french_quiz_stats_v3_2';
 
     const dom = {
         screens: { home: document.getElementById('screen-home'), summary: document.getElementById('screen-summary'), ranking: document.getElementById('screen-ranking'), quiz: document.getElementById('screen-quiz'), result: document.getElementById('screen-result') },
@@ -517,13 +464,11 @@
         rankingList: document.getElementById('rankingList'), summaryTabs: document.getElementById('summaryTabs'), summaryContent: document.getElementById('summaryContent')
     };
 
-    // Load/Save Stats
     function loadStats() { const data = localStorage.getItem(LS_KEY); globalStats = data ? JSON.parse(data) : {}; }
     function saveStats() { localStorage.setItem(LS_KEY, JSON.stringify(globalStats)); }
     function updateQuestionStat(qId, isCorrect) { if (!globalStats[qId]) globalStats[qId] = { correct: 0, wrong: 0 }; isCorrect ? globalStats[qId].correct++ : globalStats[qId].wrong++; saveStats(); }
     function resetAllStats() { if(confirm("모든 기록이 삭제됩니다.")) { localStorage.removeItem(LS_KEY); globalStats = {}; showRankingScreen(); } }
 
-    // Summary Tabs
     function initSummaryTabs() {
         const c = dom.summaryTabs; c.innerHTML = '';
         Object.keys(summaryData).forEach((k, i) => {
@@ -535,11 +480,8 @@
     }
     function loadSummaryContent(k) { dom.summaryContent.innerHTML = `<h3>${summaryData[k].title}</h3>${summaryData[k].content}`; dom.summaryContent.scrollTop = 0; }
 
-    // Navigation
     function showScreen(n) { Object.values(dom.screens).forEach(s => s.classList.remove('active')); dom.screens[n].classList.add('active'); if(n==='summary') initSummaryTabs(); }
     function goHome() { isReviewMode = false; sessionWrongAnswers = []; showScreen('home'); }
-
-    // Quiz Functions
     function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
     function startQuiz(n) { loadStats(); isReviewMode = false; dom.reviewBanner.style.display = 'none'; quizData = shuffle([...allQuestions]).slice(0, n); initSession(); }
     function startReviewLoop() { if (sessionWrongAnswers.length === 0) return; quizData = allQuestions.filter(q => sessionWrongAnswers.includes(q.id)); shuffle(quizData); isReviewMode = true; dom.reviewBanner.style.display = 'block'; initSession(); }
@@ -559,8 +501,14 @@
     function endQuiz() {
         dom.progressBar.style.width = '100%'; dom.finalScore.textContent = score; dom.totalScoreLabel.textContent = `/ ${quizData.length}`;
         dom.resultMsg.textContent = score === quizData.length ? "완벽합니다! 🇫🇷" : "수고하셨습니다.";
-        dom.reviewSec.style.display = sessionWrongAnswers.length > 0 ? 'block' : 'none';
-        if (sessionWrongAnswers.length > 0) dom.wrongCount.textContent = sessionWrongAnswers.length;
+        
+        // BUG FIX: Ensure elements exist before accessing
+        if (sessionWrongAnswers.length > 0) {
+            dom.reviewSec.style.display = 'block';
+            if(dom.wrongCount) dom.wrongCount.textContent = sessionWrongAnswers.length;
+        } else {
+            dom.reviewSec.style.display = 'none';
+        }
         showScreen('result');
     }
     function showRankingScreen() {
@@ -579,3 +527,5 @@
 </script>
 </body>
 </html>
+
+
